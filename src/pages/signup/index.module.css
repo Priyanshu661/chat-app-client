@@ -2,17 +2,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color:whitesmoke;
    
 }
-
+.formContainer{
+background-color: white;
+}
 
 .form{
     display: flex;
     flex-direction: column;
-   
+    
    align-items: center;
    padding: 2rem;
-   gap:30px
+   gap:30px;
+   margin: 0;
+
+   
   
 }
 
@@ -34,4 +43,10 @@
     width:100px;
     height:30px;
     border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn:hover{
+    background-color: rgb(215, 238, 250);
+  
 }
