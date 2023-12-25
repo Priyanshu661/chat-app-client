@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { useEffect, useReducer } from "react";
 import { useRouter } from "next/router";
+import Header from "@/components/Header/Header";
+import ChatWindow from "@/components/ChatWindow/ChatWindow";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +18,11 @@ export default function Home() {
   }, []);
   return (
     <>
-      <h1>hELLOW wORLD</h1>
+      <Header />
+
+      <div>
+        <ChatWindow />
+      </div>
     </>
   );
 }

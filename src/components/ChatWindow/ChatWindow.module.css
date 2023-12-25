@@ -1,0 +1,23 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    /* gap: 5px; */
+    width: 500px;
+    margin: auto;
+}
+
+.evenRow {
+    display: flex;
+    gap: 20px;
+    background-color: bisque;
+    padding: 5px;
+    word-break: break-word;
+}
+
+.oddRow {
+    display: flex;
+    gap: 20px;
+    background-color: white;
+    padding: 5px;
+    word-break: break-word;
+}
