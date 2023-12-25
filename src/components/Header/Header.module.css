@@ -5,4 +5,6 @@
    justify-self: flex-start;
    background-color: brown;
    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
 }

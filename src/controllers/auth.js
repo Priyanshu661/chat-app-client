@@ -12,12 +12,32 @@ export const signup = async (data) => {
       }
     );
 
-    if (response) {
+  
       return response.data;
-    } else {
-      return "error in sdjusdhsd";
-    }
+   
   } catch (e) {
     return e;
   }
 };
+
+
+export const login = async (data) => {
+  try {
+    const response = await axios.post(
+      `${process.env.SERVER_URL}/auth/login`,
+      JSON.stringify(data),
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+   
+      return response.data;
+ 
+  } catch (e) {
+    return e;
+  }
+};
+

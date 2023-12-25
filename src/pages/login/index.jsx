@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Style from "./index.module.css";
 import Header from "@/components/Header/Header";
 import { useRouter } from "next/router";
+import { login } from "@/controllers/auth";
 const Login = () => {
 
  const [details, setDetails] = useState({
@@ -15,6 +16,12 @@ const Login = () => {
  const [msg, setMsg] = useState("");
 
  const router = useRouter();
+
+ useEffect(()=>{
+    if(localStorage.getItem("token")){
+        router.push("/")
+    }
+ },[])
 
  const handleChange = (e) => {
    setError("");
@@ -32,17 +39,19 @@ const Login = () => {
  const handleSubmit = () => {
    setError("");
    setMsg("");
-//    signup(details)
-//      .then((res) => {
-//        if (res?.error) {
-//          setError(res?.error);
-//        } else if (res?.message) {
-//          setMsg(res?.message);
-//        }
-//      })
-//      .catch((e) => {
-//        setError(e);
-//      });
+   login(details)
+     .then((res) => {
+       if (res?.error) {
+         setError(res?.error);
+       } else if (res?.message) {
+         setMsg(res?.message);
+         localStorage.setItem("token",res?.token)
+         router.push("/")
+       }
+     })
+     .catch((e) => {
+       setError(e);
+     });
  };
 
 
@@ -50,15 +59,6 @@ const Login = () => {
     <>
       <div className={Style.container}>
         <Header />
-
-        <div>
-          <p style={{ fontSize: "18px", color: "red", textAlign: "center" }}>
-            {error}
-          </p>
-          <p style={{ fontSize: "18px", color: "green", textAlign: "center" }}>
-            {msg}
-          </p>
-        </div>
 
         <div className={Style.formContainer}>
           <p
@@ -68,12 +68,19 @@ const Login = () => {
               textAlign: "center",
             }}
           >
-           Login
+            Login
           </p>
-
+          <div>
+            <p style={{ fontSize: "18px", color: "red", textAlign: "center" }}>
+              {error}
+            </p>
+            <p
+              style={{ fontSize: "18px", color: "green", textAlign: "center" }}
+            >
+              {msg}
+            </p>
+          </div>
           <div className={Style.form}>
-           
-
             <label className={Style.label}>
               Email:
               <input
@@ -85,8 +92,6 @@ const Login = () => {
                 placeholder="Enter Your Email Address.."
               ></input>
             </label>
-
-          
 
             <label className={Style.label}>
               Password:
@@ -102,12 +107,11 @@ const Login = () => {
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <button onClick={handleSubmit} className={Style.btn}>
-               Login
+                Login
               </button>
               <button
                 onClick={() => router.push("/signup")}
                 className={Style.btn}
-               
               >
                 New User?
               </button>

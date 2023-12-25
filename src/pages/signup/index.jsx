@@ -49,21 +49,28 @@ const Signup = () => {
   return (
     <>
       <div className={Style.container}>
-       <Header/>
-
-        <div>
-          <p style={{ fontSize: "18px", color: "red", textAlign: "center" }}>
-            {error}
-          </p>
-          <p style={{ fontSize: "18px", color: "green", textAlign: "center" }}>
-            {msg}
-          </p>
-        </div>
+        <Header />
 
         <div className={Style.formContainer}>
-          <p style={{fontWeight:"30px", fontSize: "18px", textAlign: "center" }}>
+          <p
+            style={{
+              fontWeight: "30px",
+              fontSize: "18px",
+              textAlign: "center",
+            }}
+          >
             Create Account
           </p>
+          <div>
+            <p style={{ fontSize: "18px", color: "red", textAlign: "center" }}>
+              {error}
+            </p>
+            <p
+              style={{ fontSize: "18px", color: "green", textAlign: "center" }}
+            >
+              {msg}
+            </p>
+          </div>
 
           <div className={Style.form}>
             <label className={Style.label}>
