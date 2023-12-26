@@ -18,3 +18,22 @@ export const send_message = async (data) => {
     return e;
   }
 };
+
+export const fetch_messages = async () => {
+  try {
+    const response = await axios.get(
+      `${process.env.SERVER_URL}/message/fetch`,
+
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    return response.data;
+  } catch (e) {
+    return e;
+  }
+};

@@ -49,7 +49,7 @@ const Signup = () => {
   return (
     <>
       <div className={Style.container}>
-        <Header />
+        <Header token={false} />
 
         <div className={Style.formContainer}>
           <p

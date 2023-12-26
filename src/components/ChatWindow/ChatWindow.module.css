@@ -1,20 +1,35 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap:20px;
     max-width: 500px;
     margin: auto;
+}
+
+.chatContainer{
+    overflow: auto;
+    max-height:400px
 }
 
 .btnContainer{
     max-width: 100%;
     display: flex;
-    gap:2px;
+    gap:1rem;
     padding: 5px;
 }
 
 .input{
+        /* height: 20px; */
+        border-radius: 15px;
+        padding: 5px;
  width: 450px; 
+}
+
+.btn {
+    width: 100px;
+    /* height: 3px; */
+    border-radius: 10px;
+    cursor: pointer;
 }
 
 .evenRow {
@@ -23,6 +38,8 @@
     background-color: bisque;
     padding: 5px;
     word-break: break-word;
+    justify-content: flex-start;
+    padding-right: 10px;
 }
 
 .oddRow {
@@ -31,4 +48,6 @@
     background-color: white;
     padding: 5px;
     word-break: break-word;
+   justify-content: flex-end;
+    padding-left: 30px;
 }

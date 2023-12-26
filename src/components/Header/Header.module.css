@@ -2,9 +2,18 @@
     height:50px;
     width: 100%;
     display: flex;
-   justify-self: flex-start;
    background-color: brown;
+   justify-content: space-between;
    align-items: center;
     width: 100%;
     margin-bottom: 10px;
+}
+
+.btn {
+    width: 100px;
+    height: 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-right: 20px;
+    
 }
