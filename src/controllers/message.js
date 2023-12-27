@@ -19,10 +19,10 @@ export const send_message = async (data) => {
   }
 };
 
-export const fetch_messages = async () => {
+export const fetch_messages = async (lastMsgId) => {
   try {
     const response = await axios.get(
-      `${process.env.SERVER_URL}/message/fetch`,
+      `${process.env.SERVER_URL}/message/fetch?lastMsgId=${lastMsgId}`,
 
       {
         headers: {

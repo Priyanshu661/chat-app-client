@@ -41,18 +41,47 @@ const ChatWindow = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-     setMsg("");
-     setError("");
-    fetch_messages()
+    setMsg("");
+    setError("");
+
+    let messages = [];
+    messages = JSON.parse(localStorage.getItem("messages"));
+    console.log(messages);
+    let lastMsgId = null;
+    if (messages && messages.length > 0) {
+      lastMsgId = messages[messages.length - 1].id;
+    }
+    fetch_messages(lastMsgId)
       .then((res) => {
         if (res?.error) {
           setError(res?.error);
         } else if (res?.data) {
-          setData(res?.data);
+          if (messages) {
+            const total_messages = [...messages, ...res?.data];
+
+            if (total_messages.length > 10) {
+              while (total_messages.length > 10) {
+                total_messages.shift();
+              }
+            }
+            localStorage.setItem("messages", JSON.stringify(total_messages));
+            setData(total_messages);
+          } else {
+            const total_messages = [...res?.data];
+
+            if (total_messages.length > 10) {
+              while (total_messages.length > 10) {
+                total_messages.shift();
+              }
+            }
+
+            localStorage.setItem("messages", JSON.stringify(total_messages));
+            setData(total_messages);
+          }
         }
       })
       .catch((e) => {
-        setError(e);
+        // setError(e);
       });
   }, []);
 
@@ -77,7 +106,7 @@ const ChatWindow = () => {
       <h4 style={{ textAlign: "center", margin: "10px" }}>Chats</h4>
       <div className={Style.container}>
         <div className={Style.chatContainer}>
-          {data.map((user, index) => (
+          {data?.map((user, index) => (
             <div className={index % 2 == 0 ? Style.evenRow : Style.oddRow}>
               <div
                 style={{
