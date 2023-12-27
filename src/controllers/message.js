@@ -37,3 +37,24 @@ export const fetch_messages = async (lastMsgId) => {
     return e;
   }
 };
+
+
+export const fetch_users_for_group = async () => {
+  try {
+    const response = await axios.get(
+      `${process.env.SERVER_URL}/message/fetch-users-for-group`,
+
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    return response.data;
+  } catch (e) {
+    return e;
+  }
+};
+

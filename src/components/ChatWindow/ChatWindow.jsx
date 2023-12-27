@@ -103,37 +103,51 @@ const ChatWindow = () => {
   };
   return (
     <>
-      <h4 style={{ textAlign: "center", margin: "10px" }}>Chats</h4>
+      {/* <h4 style={{ textAlign: "center", margin: "10px" }}>Chats</h4> */}
       <div className={Style.container}>
-        <div className={Style.chatContainer}>
-          {data?.map((user, index) => (
-            <div className={index % 2 == 0 ? Style.evenRow : Style.oddRow}>
-              <div
-                style={{
-                  padding: "5px",
-                }}
-              >
-                <span>{user.name} :</span> <span>{user.message}</span>
-              </div>
-            </div>
-          ))}
+        <div className={Style.groupContainer}>
+          <h3>Users</h3>
+          <h3>Users</h3>
+          <h3>Users</h3>
+          <h3>Users</h3>
+          <h3>Users</h3>
         </div>
+        <div className={Style.chatContainer}>
+          <div className={Style.chatHeading}>
+            <span>Group Name</span>
+            {/* <span>Group Members</span> */}
+            <span>Edit</span>
+          </div>
+          <div className={Style.messageContainer}>
+            {data?.map((user, index) => (
+              <div className={index % 2 == 0 ? Style.evenRow : Style.oddRow}>
+                <div
+                  style={{
+                    padding: "5px",
+                  }}
+                >
+                  <span>{user.name} :</span> <span>{user.message}</span>
+                </div>
+              </div>
+            ))}
+          </div>
 
-        <div className={Style.btnContainer}>
-          <input
-            className={Style.input}
-            name="message"
-            value={message}
-            placeholder="Type message..."
-            onChange={(e) => {
-              setMsg("");
-              setError("");
-              setMessage(e.target.value);
-            }}
-          ></input>
-          <button className={Style.btn} onClick={handleSend}>
-            Send
-          </button>
+          <div className={Style.btnContainer}>
+            <input
+              className={Style.input}
+              name="message"
+              value={message}
+              placeholder="Type message..."
+              onChange={(e) => {
+                setMsg("");
+                setError("");
+                setMessage(e.target.value);
+              }}
+            ></input>
+            <button className={Style.btn} onClick={handleSend}>
+              Send
+            </button>
+          </div>
         </div>
 
         {(error || msg) && (
