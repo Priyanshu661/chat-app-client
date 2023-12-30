@@ -1,44 +1,57 @@
 import React, { useEffect, useState } from "react";
 import Style from "./ChatWindow.module.css";
-import { fetch_messages, send_message } from "@/controllers/message";
+import {
+  fetch_all_groups,
+  fetch_chat_messages,
+  fetch_messages,
+  send_message,
+} from "@/controllers/message";
+import BasicModal from "../Modal/Modal";
+import { Button } from "@mui/material";
 
 const ChatWindow = () => {
-  const users = [
-    {
-      name: "Priyanshu",
-      message:
-        "Helggfffttttttttttttttttttttttttttttttttttttttttttgrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrftttttttttttttttttttttttttttttlo",
-    },
-    {
-      name: "Priyanshu",
-      message:
-        "Helggfffttttttttttttttttttttttttttttttttttttttttttgrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrfrftttttttttttttttttttttttttttttlo",
-    },
-    { name: "Sharpener", message: "Hii" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-    { name: "Priyanshu", message: "Hello" },
-  ];
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
 
+  const [isEditable, setIsEditable] = useState(false);
+
+  const [groupDetails, setGroupDetails] = useState(null);
+
   const [data, setData] = useState([]);
+
+  const [groups, setGroups] = useState([]);
+
+  const [chatWindow, setChatWindow] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [myId, setMyId] = useState(null);
+
+  const [run, setRun] = useState(false);
+
+  const fetch_group_messages = (chat) => {
+    const chat_id=chat.id
+    fetch_chat_messages(chat_id).then((res) => {
+      if (res?.error) {
+        setError(res?.error);
+      } else if (res?.data) {
+        setChatWindow(chat);
+        setChatMessages(res?.data);
+        setMyId(res?.myId);
+      }
+    });
+  };
+
+  useEffect(() => {}, []);
+
+  useEffect(() => {
+    fetch_all_groups().then((res) => {
+      if (res?.error) {
+        setError(res?.error);
+      } else if (res?.data) {
+        setGroups(res?.data);
+      }
+    });
+  }, [run]);
 
   useEffect(() => {
     setMsg("");
@@ -46,7 +59,6 @@ const ChatWindow = () => {
 
     let messages = [];
     messages = JSON.parse(localStorage.getItem("messages"));
-    console.log(messages);
     let lastMsgId = null;
     if (messages && messages.length > 0) {
       lastMsgId = messages[messages.length - 1].id;
@@ -92,87 +104,170 @@ const ChatWindow = () => {
       setError("Type something to send!");
       return;
     }
-    send_message({ message }).then((res) => {
+    const chatId = chatWindow.id
+    send_message({ message, chatId}).then((res) => {
       if (res.error) {
         setError(res?.error);
       } else if (res?.message) {
         setMsg(res?.message);
+        fetch_group_messages(chatId);
         setMessage("");
       }
     });
   };
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
   return (
     <>
       {/* <h4 style={{ textAlign: "center", margin: "10px" }}>Chats</h4> */}
       <div className={Style.container}>
         <div className={Style.groupContainer}>
-          <h3>Users</h3>
-          <h3>Users</h3>
-          <h3>Users</h3>
-          <h3>Users</h3>
-          <h3>Users</h3>
-        </div>
-        <div className={Style.chatContainer}>
-          <div className={Style.chatHeading}>
-            <span>Group Name</span>
-            {/* <span>Group Members</span> */}
-            <span>Edit</span>
-          </div>
-          <div className={Style.messageContainer}>
-            {data?.map((user, index) => (
-              <div className={index % 2 == 0 ? Style.evenRow : Style.oddRow}>
-                <div
-                  style={{
-                    padding: "5px",
-                  }}
+          <Button fullWidth variant="contained" onClick={handleOpen}>
+            Create Group
+          </Button>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "30px",
+              overflowY: "auto",
+              marginTop: "50px",
+              // paddingRight: "30px",
+            }}
+          >
+            {/* <ul
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "30px",
+                scroll: "auto",
+                textAlign: "center",
+              }}
+            > */}
+            {groups.length > 0 &&
+              groups.map((item, index) => (
+                <Button
+                  onClick={() => fetch_group_messages(item)}
+                  key={index}
+                  fullWidth
+                  style={{ backgroundColor: "white" }}
+                  variant="text"
+                  // style={{
+                  //   backgroundColor: "white",
+                  //   height: "50px",
+                  //   borderRadius: "5px",
+                  //   border: "1px solid #ccc",
+                  //   display: "flex",
+                  //   alignItems: "center",
+                  //   justifyContent: "center",
+                  //   width: "100%",
+                  // }}
                 >
-                  <span>{user.name} :</span> <span>{user.message}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className={Style.btnContainer}>
-            <input
-              className={Style.input}
-              name="message"
-              value={message}
-              placeholder="Type message..."
-              onChange={(e) => {
-                setMsg("");
-                setError("");
-                setMessage(e.target.value);
-              }}
-            ></input>
-            <button className={Style.btn} onClick={handleSend}>
-              Send
-            </button>
+                  {item?.chat_name}
+                </Button>
+              ))}
+            {/* <h3>Users</h3>
+            <h3>Users</h3>
+            <h3>Users</h3>
+            <h3>Users</h3>
+            <h3>Users</h3> */}
+            {/* </ul> */}
           </div>
         </div>
+        {chatWindow ? (
+          <div className={Style.chatContainer}>
+            <div className={Style.chatHeading}>
+              <span>{chatWindow?.chat_name}</span>
+              {(error || msg) && (
+                <div>
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      color: "red",
+                      textAlign: "center",
+                    }}
+                  >
+                    {error}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      color: "green",
+                      textAlign: "center",
+                    }}
+                  >
+                    {msg}
+                  </p>
+                </div>
+              )}
+              <Button
+                onClick={() => {
+                  if (chatWindow?.AdminId !== myId) {
+                    setError("Only admin can change group details.");
+                    return;
+                  }
+                  setOpen(true);
+                  setIsEditable(true);
+                }}
+                style={{ backgroundColor: "white" }}
+                variant="text"
+              >
+                Edit
+              </Button>
+            </div>
+            <div className={Style.messageContainer}>
+              {chatMessages?.map((user, index) => (
+                <div
+                  className={
+                    myId === user?.user_id ? Style.oddRow : Style.evenRow
+                  }
+                >
+                  <div
+                    style={{
+                      padding: "5px",
+                    }}
+                  >
+                    <span>{user.name} :</span> <span>{user.message}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {(error || msg) && (
-          <div>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "red",
-                textAlign: "center",
-              }}
-            >
-              {error}
-            </p>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "green",
-                textAlign: "center",
-              }}
-            >
-              {msg}
-            </p>
+            <div className={Style.btnContainer}>
+              <input
+                className={Style.input}
+                name="message"
+                value={message}
+                placeholder="Type message..."
+                onChange={(e) => {
+                  setMsg("");
+                  setError("");
+                  setMessage(e.target.value);
+                }}
+              ></input>
+
+              <button className={Style.btn} onClick={handleSend}>
+                Send
+              </button>
+            </div>
           </div>
+        ) : (
+          <h3 style={{ textAlign: "center", margin: "auto" }}>
+            Click on group to Start Chatting
+          </h3>
         )}
       </div>
+      <BasicModal
+        run={run}
+        setRun={setRun}
+        chat_id={chatWindow?.id}
+        isEditable={isEditable}
+        setIsEditable={setIsEditable}
+        open={open}
+        setOpen={setOpen}
+      />
     </>
   );
 };

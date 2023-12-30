@@ -20,9 +20,7 @@ export default function Home() {
     <>
       <Header />
 
-      <div>
-        <ChatWindow />
-      </div>
+      <ChatWindow />
     </>
   );
 }
