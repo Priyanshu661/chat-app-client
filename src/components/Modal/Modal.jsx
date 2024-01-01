@@ -61,17 +61,19 @@ export default function BasicModal({
   }
 
   useEffect(() => {
-    fetch_group_details(chat_id).then((res) => {
-      if (res?.error) {
-        setError(res?.error);
-      } else if (res?.data) {
-        setDetails({
-          group_name: res?.data?.groupName,
-        });
-        setSelectedUsers(res?.data?.memberData);
-      }
-    });
-  }, [chat_id]);
+    if (isEditable && chat_id) {
+      fetch_group_details(chat_id).then((res) => {
+        if (res?.error) {
+          setError(res?.error);
+        } else if (res?.data) {
+          setDetails({
+            group_name: res?.data?.groupName,
+          });
+          setSelectedUsers(res?.data?.memberData);
+        }
+      });
+    }
+  }, [chat_id, isEditable]);
 
   useEffect(() => {
     fetch_users_for_group().then((res) => {

@@ -9,6 +9,8 @@ import {
 import BasicModal from "../Modal/Modal";
 import { Button } from "@mui/material";
 
+import { io } from "socket.io-client";
+
 const ChatWindow = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -27,15 +29,37 @@ const ChatWindow = () => {
   const [myId, setMyId] = useState(null);
 
   const [run, setRun] = useState(false);
+  const [runSocket, setRunSocket] = useState(false);
 
-  const fetch_group_messages = (chat) => {
-    const chat_id=chat.id
+  const socket = io("http://localhost:5000");
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+    });
+
+    socket.on("receive-message", (chatId) => {
+      console.log("Received message:", chatId);
+      fetch_group_messages(chatId);
+    });
+
+    return () => {
+      socket.disconnect();
+      console.log("Disconnected");
+    };
+  }, [socket]);
+
+
+  const fetch_group_messages = (chat_id) => {
+    // const chat_id = chat.id;
     fetch_chat_messages(chat_id).then((res) => {
       if (res?.error) {
         setError(res?.error);
       } else if (res?.data) {
-        setChatWindow(chat);
+        // setChatWindow(chat);
         setChatMessages(res?.data);
+        // console.log(res?.data);
+
         setMyId(res?.myId);
       }
     });
@@ -53,49 +77,49 @@ const ChatWindow = () => {
     });
   }, [run]);
 
-  useEffect(() => {
-    setMsg("");
-    setError("");
+  // useEffect(() => {
+  //   setMsg("");
+  //   setError("");
 
-    let messages = [];
-    messages = JSON.parse(localStorage.getItem("messages"));
-    let lastMsgId = null;
-    if (messages && messages.length > 0) {
-      lastMsgId = messages[messages.length - 1].id;
-    }
-    fetch_messages(lastMsgId)
-      .then((res) => {
-        if (res?.error) {
-          setError(res?.error);
-        } else if (res?.data) {
-          if (messages) {
-            const total_messages = [...messages, ...res?.data];
+  //   let messages = [];
+  //   messages = JSON.parse(localStorage.getItem("messages"));
+  //   let lastMsgId = null;
+  //   if (messages && messages.length > 0) {
+  //     lastMsgId = messages[messages.length - 1].id;
+  //   }
+  //   fetch_messages(lastMsgId)
+  //     .then((res) => {
+  //       if (res?.error) {
+  //         setError(res?.error);
+  //       } else if (res?.data) {
+  //         if (messages) {
+  //           const total_messages = [...messages, ...res?.data];
 
-            if (total_messages.length > 10) {
-              while (total_messages.length > 10) {
-                total_messages.shift();
-              }
-            }
-            localStorage.setItem("messages", JSON.stringify(total_messages));
-            setData(total_messages);
-          } else {
-            const total_messages = [...res?.data];
+  //           if (total_messages.length > 10) {
+  //             while (total_messages.length > 10) {
+  //               total_messages.shift();
+  //             }
+  //           }
+  //           localStorage.setItem("messages", JSON.stringify(total_messages));
+  //           setData(total_messages);
+  //         } else {
+  //           const total_messages = [...res?.data];
 
-            if (total_messages.length > 10) {
-              while (total_messages.length > 10) {
-                total_messages.shift();
-              }
-            }
+  //           if (total_messages.length > 10) {
+  //             while (total_messages.length > 10) {
+  //               total_messages.shift();
+  //             }
+  //           }
 
-            localStorage.setItem("messages", JSON.stringify(total_messages));
-            setData(total_messages);
-          }
-        }
-      })
-      .catch((e) => {
-        // setError(e);
-      });
-  }, []);
+  //           localStorage.setItem("messages", JSON.stringify(total_messages));
+  //           setData(total_messages);
+  //         }
+  //       }
+  //     })
+  //     .catch((e) => {
+  //       // setError(e);
+  //     });
+  // }, []);
 
   const handleSend = () => {
     setMsg("");
@@ -104,13 +128,18 @@ const ChatWindow = () => {
       setError("Type something to send!");
       return;
     }
-    const chatId = chatWindow.id
-    send_message({ message, chatId}).then((res) => {
+
+
+    const chatId = chatWindow.id;
+    socket.emit("send-message", chatId);
+
+    send_message({ message, chatId }).then((res) => {
       if (res.error) {
         setError(res?.error);
       } else if (res?.message) {
         setMsg(res?.message);
-        fetch_group_messages(chatId);
+        // setRunSocket(!runSocket);
+        // fetch_group_messages(chatId);
         setMessage("");
       }
     });
@@ -149,7 +178,11 @@ const ChatWindow = () => {
             {groups.length > 0 &&
               groups.map((item, index) => (
                 <Button
-                  onClick={() => fetch_group_messages(item)}
+                  onClick={() => {
+                    setChatWindow(item)
+                    fetch_group_messages(item.id)
+                    
+                    }}
                   key={index}
                   fullWidth
                   style={{ backgroundColor: "white" }}
