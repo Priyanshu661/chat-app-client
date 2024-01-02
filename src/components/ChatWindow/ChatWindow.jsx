@@ -33,7 +33,7 @@ const ChatWindow = () => {
   const [run, setRun] = useState(false);
   const [runSocket, setRunSocket] = useState(false);
 
-  const socket = io("http://localhost:5000");
+  const socket = io("http://http://13.200.241.129:5000");
 
   useEffect(() => {
     socket.on("connect", () => {
