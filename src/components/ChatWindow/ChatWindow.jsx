@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Style from "./ChatWindow.module.css";
 import {
   fetch_all_groups,
   fetch_chat_messages,
   fetch_messages,
+  send_file_message,
   send_message,
 } from "@/controllers/message";
 import BasicModal from "../Modal/Modal";
 import { Button } from "@mui/material";
 
 import { io } from "socket.io-client";
+import { upload_to_s3 } from "@/services/aws-sdk";
 
 const ChatWindow = () => {
   const [message, setMessage] = useState("");
@@ -48,7 +50,6 @@ const ChatWindow = () => {
       console.log("Disconnected");
     };
   }, [socket]);
-
 
   const fetch_group_messages = (chat_id) => {
     // const chat_id = chat.id;
@@ -129,7 +130,6 @@ const ChatWindow = () => {
       return;
     }
 
-
     const chatId = chatWindow.id;
     socket.emit("send-message", chatId);
 
@@ -144,9 +144,47 @@ const ChatWindow = () => {
       }
     });
   };
+  const formData = new FormData();
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+
+  const fileInputRef = useRef(null);
+  const handleFileChange = async (event) => {
+    const filename = `chatApp/${chatWindow.id}/${new Date()}`;
+
+    try {
+      const selectedFile = await upload_to_s3(filename, event.target.files[0]);
+      uploadFileToBackend(selectedFile?.Location);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleButtonClick = () => {
+    // Trigger the file input dialog when the button is clicked
+    fileInputRef.current.click();
+  };
+
+  const uploadFileToBackend = async (file) => {
+    const chatId = chatWindow.id;
+
+    // formData.append("file", file);
+
+    //  console.log(formData.get("file"))
+    //  socket.emit("send-message", chatId);
+    send_file_message({ message: file, chatId }).then((res) => {
+      if (res.error) {
+        setError(res?.error);
+      } else if (res?.message) {
+        setMsg(res?.message);
+        // setRunSocket(!runSocket);
+        // fetch_group_messages(chatId);
+        setMessage("");
+      }
+    });
+  };
+
   return (
     <>
       {/* <h4 style={{ textAlign: "center", margin: "10px" }}>Chats</h4> */}
@@ -179,10 +217,9 @@ const ChatWindow = () => {
               groups.map((item, index) => (
                 <Button
                   onClick={() => {
-                    setChatWindow(item)
-                    fetch_group_messages(item.id)
-                    
-                    }}
+                    setChatWindow(item);
+                    fetch_group_messages(item.id);
+                  }}
                   key={index}
                   fullWidth
                   style={{ backgroundColor: "white" }}
@@ -256,19 +293,57 @@ const ChatWindow = () => {
                   className={
                     myId === user?.user_id ? Style.oddRow : Style.evenRow
                   }
+                  style={{marginBottom:"20px"}}
                 >
                   <div
                     style={{
+                      display: "flex",
+                      flexDirection: "column",
                       padding: "5px",
                     }}
                   >
-                    <span>{user.name} :</span> <span>{user.message}</span>
+                    <span>{user.name} :</span>{" "}
+                    <span>
+                      {user?.isFile ? (
+                        <a
+                          href={user.message} // Provide the URL of the image
+                          download="chat_app_img.png"
+                        >
+                          <img
+                            style={{
+                              width: "150px",
+                              maxHeight: "150px",
+                              height: "auto",
+                              width: "auto",
+                            }}
+                            src={user.message}
+                            alt={"myfile"}
+                          />
+                        </a>
+                      ) : (
+                        user.message
+                      )}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className={Style.btnContainer}>
+              <input
+                type="file"
+                // accept="image/*"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <Button
+                onClick={handleButtonClick}
+                style={{ fontSize: "20px" }}
+                variant="contained"
+              >
+                +
+              </Button>
               <input
                 className={Style.input}
                 name="message"

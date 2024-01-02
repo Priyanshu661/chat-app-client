@@ -19,6 +19,26 @@ export const send_message = async (data) => {
   }
 };
 
+export const send_file_message = async (data) => {
+  try {
+    const response = await axios.post(
+      `${process.env.SERVER_URL}/message/send-file-message`,
+      JSON.stringify(data),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          // "Content-Type": "multipart/form-data",
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    return response.data;
+  } catch (e) {
+    return e;
+  }
+};
+
 export const fetch_messages = async (lastMsgId) => {
   try {
     const response = await axios.get(
@@ -131,7 +151,7 @@ export const fetch_group_details = async (id) => {
   }
 };
 
-export const update_group_details = async (id,data) => {
+export const update_group_details = async (id, data) => {
   try {
     const response = await axios.put(
       `${process.env.SERVER_URL}/message/update-group-details/${id}`,

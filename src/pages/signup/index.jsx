@@ -39,6 +39,7 @@ const Signup = () => {
           setError(res?.error);
         } else if (res?.message) {
           setMsg(res?.message);
+          router.push("/login")
         }
       })
       .catch((e) => {
