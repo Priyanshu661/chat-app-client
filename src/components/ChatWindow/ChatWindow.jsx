@@ -170,7 +170,7 @@ const ChatWindow = () => {
     const chatId = chatWindow.id;
 
     // formData.append("file", file);
-
+      socket.emit("send-message", chatId);
     //  console.log(formData.get("file"))
     //  socket.emit("send-message", chatId);
     send_file_message({ message: file, chatId }).then((res) => {
