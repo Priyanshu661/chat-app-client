@@ -33,23 +33,33 @@ const ChatWindow = () => {
   const [run, setRun] = useState(false);
   const [runSocket, setRunSocket] = useState(false);
 
-  const socket = io("http://http://13.200.241.129:5000");
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
+   
+    // const newSocket = io("http://localhost:5000");
+    const newSocket = io("http://13.200.241.129");
+
+
+    newSocket.once("connect", () => {
+      console.log("Connected:", newSocket.id);
     });
 
-    socket.on("receive-message", (chatId) => {
+   
+
+   
+    newSocket.on("receive-message", (chatId) => {
       console.log("Received message:", chatId);
       fetch_group_messages(chatId);
     });
 
+     setSocket(newSocket);
+
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
       console.log("Disconnected");
     };
-  }, [socket]);
+  }, []);
 
   const fetch_group_messages = (chat_id) => {
     // const chat_id = chat.id;
@@ -66,7 +76,17 @@ const ChatWindow = () => {
     });
   };
 
-  useEffect(() => {}, []);
+  
+  useEffect(() => {
+    // Your logic to fetch or update messages
+    // ...
+
+    // Scroll to the bottom of the container when messages are updated
+    const container = document.getElementById("chatWindow"); // replace 'yourContainerId' with the actual ID
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [chatMessages]);
 
   useEffect(() => {
     fetch_all_groups().then((res) => {
@@ -78,49 +98,7 @@ const ChatWindow = () => {
     });
   }, [run]);
 
-  // useEffect(() => {
-  //   setMsg("");
-  //   setError("");
-
-  //   let messages = [];
-  //   messages = JSON.parse(localStorage.getItem("messages"));
-  //   let lastMsgId = null;
-  //   if (messages && messages.length > 0) {
-  //     lastMsgId = messages[messages.length - 1].id;
-  //   }
-  //   fetch_messages(lastMsgId)
-  //     .then((res) => {
-  //       if (res?.error) {
-  //         setError(res?.error);
-  //       } else if (res?.data) {
-  //         if (messages) {
-  //           const total_messages = [...messages, ...res?.data];
-
-  //           if (total_messages.length > 10) {
-  //             while (total_messages.length > 10) {
-  //               total_messages.shift();
-  //             }
-  //           }
-  //           localStorage.setItem("messages", JSON.stringify(total_messages));
-  //           setData(total_messages);
-  //         } else {
-  //           const total_messages = [...res?.data];
-
-  //           if (total_messages.length > 10) {
-  //             while (total_messages.length > 10) {
-  //               total_messages.shift();
-  //             }
-  //           }
-
-  //           localStorage.setItem("messages", JSON.stringify(total_messages));
-  //           setData(total_messages);
-  //         }
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       // setError(e);
-  //     });
-  // }, []);
+ 
 
   const handleSend = () => {
     setMsg("");
@@ -131,7 +109,10 @@ const ChatWindow = () => {
     }
 
     const chatId = chatWindow.id;
-    socket.emit("send-message", chatId);
+    if (!socket?.connected) {
+      // Reconnect if the socket is disconnected
+      socket.connect();
+    }
 
     send_message({ message, chatId }).then((res) => {
       if (res.error) {
@@ -140,6 +121,9 @@ const ChatWindow = () => {
         setMsg(res?.message);
         // setRunSocket(!runSocket);
         // fetch_group_messages(chatId);
+
+        socket.emit("send-message", chatId);
+
         setMessage("");
       }
     });
@@ -168,22 +152,27 @@ const ChatWindow = () => {
 
   const uploadFileToBackend = async (file) => {
     const chatId = chatWindow.id;
+    if (!socket.connected) {
+    
+      socket.connect();
+    }
 
-    // formData.append("file", file);
-      socket.emit("send-message", chatId);
-    //  console.log(formData.get("file"))
-    //  socket.emit("send-message", chatId);
+
     send_file_message({ message: file, chatId }).then((res) => {
       if (res.error) {
         setError(res?.error);
       } else if (res?.message) {
         setMsg(res?.message);
-        // setRunSocket(!runSocket);
-        // fetch_group_messages(chatId);
+       
+
+        socket.emit("send-message", chatId);
         setMessage("");
       }
     });
   };
+
+
+
 
   return (
     <>
@@ -261,15 +250,6 @@ const ChatWindow = () => {
                   >
                     {error}
                   </p>
-                  <p
-                    style={{
-                      fontSize: "15px",
-                      color: "green",
-                      textAlign: "center",
-                    }}
-                  >
-                    {msg}
-                  </p>
                 </div>
               )}
               <Button
@@ -287,13 +267,13 @@ const ChatWindow = () => {
                 Edit
               </Button>
             </div>
-            <div className={Style.messageContainer}>
+            <div className={Style.messageContainer} id="chatWindow">
               {chatMessages?.map((user, index) => (
                 <div
                   className={
                     myId === user?.user_id ? Style.oddRow : Style.evenRow
                   }
-                  style={{marginBottom:"20px"}}
+                  style={{ marginBottom: "20px" }}
                 >
                   <div
                     style={{
@@ -360,6 +340,17 @@ const ChatWindow = () => {
                 Send
               </button>
             </div>
+            {msg && (
+              <p
+                style={{
+                  fontSize: "15px",
+                  color: "green",
+                  textAlign: "center",
+                }}
+              >
+                {msg}
+              </p>
+            )}
           </div>
         ) : (
           <h3 style={{ textAlign: "center", margin: "auto" }}>
@@ -381,3 +372,49 @@ const ChatWindow = () => {
 };
 
 export default ChatWindow;
+
+
+
+ // useEffect(() => {
+  //   setMsg("");
+  //   setError("");
+
+  //   let messages = [];
+  //   messages = JSON.parse(localStorage.getItem("messages"));
+  //   let lastMsgId = null;
+  //   if (messages && messages.length > 0) {
+  //     lastMsgId = messages[messages.length - 1].id;
+  //   }
+  //   fetch_messages(lastMsgId)
+  //     .then((res) => {
+  //       if (res?.error) {
+  //         setError(res?.error);
+  //       } else if (res?.data) {
+  //         if (messages) {
+  //           const total_messages = [...messages, ...res?.data];
+
+  //           if (total_messages.length > 10) {
+  //             while (total_messages.length > 10) {
+  //               total_messages.shift();
+  //             }
+  //           }
+  //           localStorage.setItem("messages", JSON.stringify(total_messages));
+  //           setData(total_messages);
+  //         } else {
+  //           const total_messages = [...res?.data];
+
+  //           if (total_messages.length > 10) {
+  //             while (total_messages.length > 10) {
+  //               total_messages.shift();
+  //             }
+  //           }
+
+  //           localStorage.setItem("messages", JSON.stringify(total_messages));
+  //           setData(total_messages);
+  //         }
+  //       }
+  //     })
+  //     .catch((e) => {
+  //       // setError(e);
+  //     });
+  // }, []);
